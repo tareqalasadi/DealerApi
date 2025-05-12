@@ -11,8 +11,9 @@ namespace DealerApi.AppDb
         public DbSet<Property> Properties { get; set; }
         public DbSet<PropertyCategory> PropertyCategories { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
+        public DbSet<PropertyRequest> PropertyRequests { get; set; }
+        public DbSet<PropertyRequestImage> PropertyRequestImage { get; set; }
 
-       
     }
 
 }

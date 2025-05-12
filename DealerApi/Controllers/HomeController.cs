@@ -18,7 +18,7 @@ namespace DealerApi.Controllers
         public HomeController(AppDbContext appDbContext, IRedisService redisService)
         {
             _context = appDbContext;
-            _IRedisService= redisService;
+            _IRedisService = redisService;
         }
         [HttpPost("AddCategory")]
         public async Task<IActionResult> AddCategory(PropertyCategory category)
@@ -86,7 +86,7 @@ namespace DealerApi.Controllers
                     c.Id,
                     c.NameEn,
                     c.NameAr,
-                    c.Image
+                    c.ImagePath
                 })
                 .ToListAsync();
 
@@ -97,7 +97,6 @@ namespace DealerApi.Controllers
 
             return Ok(categories);
         }
-
 
         [HttpGet("GetProperties/{categoryId}")]
         public async Task<IActionResult> GetProperties(int categoryId)
@@ -127,7 +126,7 @@ namespace DealerApi.Controllers
                 }
 
                 if (properties == null || properties.Count == 0)
-                    return NotFound("No properties found.");
+                    return Ok(properties);
 
                 await _IRedisService.SetAsync(cacheKey, properties, TimeSpan.FromDays(365));
 
@@ -165,6 +164,94 @@ namespace DealerApi.Controllers
             return Ok(propertiesImg);
         }
 
+
+        [HttpPost("SubmitProperty")]
+        public async Task<IActionResult> SubmitProperty([FromBody] PropertyRequest model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                _context.PropertyRequests.Add(model);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, message = "Property saved successfully" });
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        [HttpGet("GetAllPropertyRequests")]
+        public async Task<IActionResult> GetAllPropertyRequests()
+        {
+            var requests = await _context.PropertyRequests
+                .ToListAsync();
+            return Ok(requests);
+        }
+
+        [HttpGet("GetPropertyRequestById/{id}")]
+        public async Task<IActionResult> GetPropertyRequestById(int id)
+        {
+            var request = await _context.PropertyRequests
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (request == null)
+                return NotFound();
+            return Ok(request);
+        }
+
+
+        [HttpPost("ApprovePropertyRequest")]
+        public async Task<IActionResult> ApprovePropertyRequest(PropertyRequest request)
+        {
+            var requests = await _context.PropertyRequests
+                 .Include(p => p.Images)
+               .FirstOrDefaultAsync(p => p.Id == request.Id);
+
+            Property Property = new Property
+            {
+                CategoryId = requests.CategoryId,
+                Area = request.Area,
+                CountBaths = request.NumberOfBathrooms ?? 0,
+                CountBeds = request.NumberOfRooms ?? 0,
+                Location = request.Location,
+                Space = request.Space ?? 0,
+                Price = Convert.ToDouble(request.Price ?? 0),
+                DescEn = request.DescEn,
+                DescAr = request.DescAr,
+                Image = requests.Images?.FirstOrDefault()?.ImageData?? [0],
+            };
+
+            _context.Properties.Add(Property);
+            await _context.SaveChangesAsync();
+
+
+            if (requests.Images != null && requests.Images.Count > 0)
+            {
+                foreach (var imgBytes in requests.Images)
+                {
+                    var propertyImage = new PropertyImage
+                    {
+                        ImageData = imgBytes.ImageData,
+                        PropertyId = Property.Id
+                    };
+                    _context.PropertyImages.Add(propertyImage);
+                }
+                await _context.SaveChangesAsync();
+
+                await _IRedisService.RemoveAsync($"property:images:{Property.Id}");
+            }
+
+            _context.Remove(requests);
+
+            // Suppose you add a new field "IsApproved"
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 
 }

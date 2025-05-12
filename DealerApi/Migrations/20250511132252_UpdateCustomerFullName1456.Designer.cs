@@ -3,6 +3,7 @@ using DealerApi.AppDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DealerApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250511132252_UpdateCustomerFullName1456")]
+    partial class UpdateCustomerFullName1456
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,14 +131,6 @@ namespace DealerApi.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DescAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DescEn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("FloorNumber")
                         .HasColumnType("int");
 
@@ -188,7 +183,7 @@ namespace DealerApi.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int?>("PropertyRequestId")
+                    b.Property<int>("PropertyRequestId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -200,9 +195,13 @@ namespace DealerApi.Migrations
 
             modelBuilder.Entity("DealerApi.DomenClass.PropertyRequestImage", b =>
                 {
-                    b.HasOne("DealerApi.DomenClass.PropertyRequest", null)
+                    b.HasOne("DealerApi.DomenClass.PropertyRequest", "PropertyRequest")
                         .WithMany("Images")
-                        .HasForeignKey("PropertyRequestId");
+                        .HasForeignKey("PropertyRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PropertyRequest");
                 });
 
             modelBuilder.Entity("DealerApi.DomenClass.PropertyRequest", b =>

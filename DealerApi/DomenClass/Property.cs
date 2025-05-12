@@ -10,7 +10,6 @@
         public int CountBaths { get; set; }
         public int Space { get; set; }
         public double Price { get; set; }
-
         public int CategoryId { get; set; }
         public byte[] Image { get; set; }
         public string Area { get; set; }

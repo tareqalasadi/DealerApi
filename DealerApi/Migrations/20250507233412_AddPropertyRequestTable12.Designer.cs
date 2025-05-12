@@ -3,6 +3,7 @@ using DealerApi.AppDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DealerApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507233412_AddPropertyRequestTable12")]
+    partial class AddPropertyRequestTable12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,14 +131,6 @@ namespace DealerApi.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DescAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DescEn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("FloorNumber")
                         .HasColumnType("int");
 
@@ -168,46 +163,9 @@ namespace DealerApi.Migrations
                     b.Property<int?>("Space")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("TakePicture")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.ToTable("PropertyRequests");
-                });
-
-            modelBuilder.Entity("DealerApi.DomenClass.PropertyRequestImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<byte[]>("ImageData")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int?>("PropertyRequestId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropertyRequestId");
-
-                    b.ToTable("PropertyRequestImage");
-                });
-
-            modelBuilder.Entity("DealerApi.DomenClass.PropertyRequestImage", b =>
-                {
-                    b.HasOne("DealerApi.DomenClass.PropertyRequest", null)
-                        .WithMany("Images")
-                        .HasForeignKey("PropertyRequestId");
-                });
-
-            modelBuilder.Entity("DealerApi.DomenClass.PropertyRequest", b =>
-                {
-                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }
